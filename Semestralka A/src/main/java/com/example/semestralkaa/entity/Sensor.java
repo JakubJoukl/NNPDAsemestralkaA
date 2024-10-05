@@ -2,9 +2,11 @@ package com.example.semestralkaa.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@NoArgsConstructor
 public class Sensor {
 
     @Id
@@ -12,8 +14,14 @@ public class Sensor {
     private Integer sensorId;
 
     @Column
-    private Double measuredValue;
+    private String sensorName;
 
     @ManyToOne
     private MeasuringDevice measuringDevice;
+
+    private transient Double measuredValue;
+
+    public Sensor(String sensorName){
+        this.sensorName = sensorName;
+    }
 }

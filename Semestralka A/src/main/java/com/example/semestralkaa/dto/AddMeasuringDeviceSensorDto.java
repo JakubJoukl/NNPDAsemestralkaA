@@ -3,8 +3,8 @@ package com.example.semestralkaa.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-public class ResetPasswordDto {
+public class AddMeasuringDeviceSensorDto {
     @Getter
     @Setter
-    private String username;
+    private String sensorName;
 }

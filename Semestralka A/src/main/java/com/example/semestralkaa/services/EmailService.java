@@ -25,7 +25,7 @@ public class EmailService {
 
     Properties properties = System.getProperties();
 
-    //Api key: 4e17ac5eb87c7569cbfd878a63e437f3-3724298e-9c98952c
+    //Heslo: akxx jzcv whcy zptj
 
     public EmailService() {
         MailSSLSocketFactory sf = null;
@@ -37,7 +37,7 @@ public class EmailService {
         sf.setTrustAllHosts(true);
 
         // Setup mail server
-        properties.put("mail.smtp.host", "smtp.mailgun.org");
+        properties.put("mail.smtp.host", "smtp.gmail.com");
         properties.put("mail.smtp.port", "587");
         properties.put("mail.smtp.starttls.enable", "true");
         properties.put("mail.smtp.auth", "true");
@@ -50,7 +50,7 @@ public class EmailService {
         Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
 
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("postmaster@sandbox52d5c37deba9467a95f5ad2766a93700.mailgun.org", "47c4b380b0b6a3318fc39b46acd50613-3724298e-812419a8");
+                return new PasswordAuthentication("semestralkaa@gmail.com", "akxx jzcv whcy zptj");
 
             }
 
@@ -69,8 +69,9 @@ public class EmailService {
 
             ResetToken resetToken = new ResetToken(user, token);
             user.getResetTokens().add(resetToken);
+            userService.saveResetToken(resetToken);
 
-            message.setFrom(new InternetAddress("sender@example.com"));
+            message.setFrom(new InternetAddress("semestralkaa@gmail.com"));
             message.setRecipients(MimeMessage.RecipientType.TO, user.getEmail());
             message.setSubject("Test email reset hesla pro " + user.getEmail());
 

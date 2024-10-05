@@ -3,12 +3,14 @@ package com.example.semestralkaa.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-public class ChangePasswordDto {
+import java.util.List;
+
+public class UpdateDeviceDto {
     @Getter
     @Setter
-    private String oldPassword;
+    String deviceName;
 
     @Getter
     @Setter
-    private String newPassword;
+    private List<AddMeasuringDeviceSensorDto> sensors;
 }

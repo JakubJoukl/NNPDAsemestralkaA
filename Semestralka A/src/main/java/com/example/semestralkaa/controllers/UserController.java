@@ -1,11 +1,10 @@
 package com.example.semestralkaa.controllers;
 
-import com.example.semestralkaa.dto.ChangePasswordDto;
+import com.example.semestralkaa.dto.*;
+import com.example.semestralkaa.entity.MeasuringDevice;
 import com.example.semestralkaa.entity.ResetToken;
+import com.example.semestralkaa.entity.Sensor;
 import com.example.semestralkaa.entity.User;
-import com.example.semestralkaa.dto.LoginDto;
-import com.example.semestralkaa.dto.RegistrationDto;
-import com.example.semestralkaa.dto.ResetPasswordDto;
 import com.example.semestralkaa.security.JwtService;
 import com.example.semestralkaa.services.EmailService;
 import com.example.semestralkaa.services.UserService;
@@ -14,11 +13,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping
@@ -57,20 +57,15 @@ public class UserController {
     }
 
     @PostMapping("/resetPassword")
-    public ResponseEntity<String> resetPassword(@RequestBody LoginDto authRequest) throws MessagingException {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
-        );
-        if (!authentication.isAuthenticated()) {
-            return ResponseEntity.status(403).body("Bad login");
-        }
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDto authRequest) throws MessagingException {
         User user = userService.getUserByUsername(authRequest.getUsername());
+        if(user == null) return ResponseEntity.status(404).body("User not found");
         emailService.sendResetTokenEmail(user);
         return ResponseEntity.status(200).body("Reset email send");
     }
 
     @PostMapping("/newPassword")
-    public ResponseEntity<String> newPassword(@RequestBody ResetPasswordDto resetPasswordRequest){
+    public ResponseEntity<String> newPassword(@RequestBody NewPasswordDto resetPasswordRequest){
         ResetToken resetToken = userService.getResetTokenByValue(resetPasswordRequest.getToken());
 
         if(resetToken == null) return ResponseEntity.status(400).body("Reset token not found");
@@ -78,7 +73,7 @@ public class UserController {
         boolean resetTokenIsValid = resetToken.isValid() && LocalDateTime.now().isBefore(resetToken.getValidTo());
         if(resetTokenIsValid){
             User user = resetToken.getUser();
-            user.setPassword(resetPasswordRequest.getPassword());
+            userService.changePassword(resetPasswordRequest.getPassword(), user);
             userService.saveUser(user);
         }
         resetToken.setValid(false);
@@ -88,16 +83,61 @@ public class UserController {
         else return ResponseEntity.status(400).body("Reset token was already used or expired");
     }
 
-    @PostMapping("/changePassword")
-    public ResponseEntity<String> changePassword(ChangePasswordDto changePasswordDto){
-        if(changePasswordDto.getJwtToken() == null || new Date().after(jwtService.extractExpiration(changePasswordDto.getJwtToken()))){
-            return ResponseEntity.status(403).body("Unauthorized");
-        }
-        String username = jwtService.extractUsername(changePasswordDto.getJwtToken());
-        userService.changePassword(changePasswordDto, username);
+    @PutMapping("/changePassword")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordDto changePasswordDto){
+        User user = userService.getUserFromContext();
 
-        return ResponseEntity.status(200).body("Unauthorized");
+        if(user == null) return ResponseEntity.status(404).body("User not found");
+        String oldPassword = changePasswordDto.getOldPassword();
+        if(userService.checkUserPassword(oldPassword, user)) return ResponseEntity.status(400).body("Old password was wrong");
+
+        String newPassword = changePasswordDto.getNewPassword();
+        userService.changePassword(newPassword, user);
+
+        return ResponseEntity.status(200).body("Password changed");
     }
 
-    //TODO samostatne controllery pro merici zarizeni a senzor
+    @PostMapping("/addDevice")
+    public ResponseEntity<String> addDevice(@RequestBody AddDeviceDto addDeviceDto){
+        User user = userService.getUserFromContext();
+        if(user == null) return ResponseEntity.status(404).body("User not found");
+
+        List<Sensor> sensors = userService.convertAddMeasuringDeviceSensorDtoToEntityList(addDeviceDto.getSensors());
+        boolean deviceAdded = userService.addMeasuringDevice(addDeviceDto.getDeviceName(), sensors, user);
+
+        if(deviceAdded) return ResponseEntity.status(200).body("Device registered");
+        else return ResponseEntity.status(500).body("Failed to add device");
+    }
+
+    @DeleteMapping("/deleteDevice")
+    public ResponseEntity<String> deleteDevice(@RequestBody DeleteDeviceDto deleteDeviceDto){
+        User user = userService.getUserFromContext();
+        if(user == null) return ResponseEntity.status(404).body("User not found");
+        boolean deviceAdded = userService.deleteMeasuringDevice(deleteDeviceDto.getDeviceName(), user);
+
+        if(deviceAdded) return ResponseEntity.status(200).body("Device deleted");
+        else return ResponseEntity.status(500).body("Failed to delete device");
+    }
+
+    @GetMapping("/getDevice/{deviceName}")
+    public ResponseEntity<?> getDevice(@PathVariable("deviceName") String deviceName){
+        User user = userService.getUserFromContext();
+        if(user == null) return ResponseEntity.status(404).body("User not found");
+
+        MeasuringDevice measuringDevice = userService.getDevice(deviceName, user);
+        if(measuringDevice == null) return ResponseEntity.status(500).body("Device not found");
+        return ResponseEntity.status(200).body(userService.convertToDto(measuringDevice));
+    }
+
+    @PutMapping("/updateDevice")
+    public ResponseEntity<String> updateDevice(@RequestBody UpdateDeviceDto updateDeviceDto){
+        User user = userService.getUserFromContext();
+        if(user == null) return ResponseEntity.status(404).body("User not found");
+
+        List<Sensor> sensors = userService.convertAddMeasuringDeviceSensorDtoToEntityList(updateDeviceDto.getSensors());
+        boolean deviceUpdated = userService.updateDevice(updateDeviceDto.getDeviceName(), sensors, user);
+
+        if(deviceUpdated) return ResponseEntity.status(200).body("Device updated");
+        else return ResponseEntity.status(500).body("Failed to update device");
+    }
 }

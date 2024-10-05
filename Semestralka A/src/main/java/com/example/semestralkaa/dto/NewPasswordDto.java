@@ -3,12 +3,12 @@ package com.example.semestralkaa.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-public class ChangePasswordDto {
+public class NewPasswordDto {
     @Getter
     @Setter
-    private String oldPassword;
+    private String token;
 
     @Getter
     @Setter
-    private String newPassword;
+    private String password;
 }

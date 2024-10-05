@@ -35,6 +35,9 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<ResetToken> resetTokens;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MeasuringDevice> measuringDevices;
+
 
     //TODO pokud bude třeba tak přesunout do DB
     @Override
@@ -42,10 +45,6 @@ public class User implements UserDetails {
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("USER"));
         return authorities;
-    }
-
-    public void setPassword(String password) {
-        this.password = new BCryptPasswordEncoder().encode(password);
     }
 
     @Override

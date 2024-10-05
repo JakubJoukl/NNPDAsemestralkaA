@@ -3,12 +3,12 @@ package com.example.semestralkaa.dto;
 import lombok.Getter;
 import lombok.Setter;
 
-public class ChangePasswordDto {
+public class SensorDto {
     @Getter
     @Setter
-    private String oldPassword;
+    private MeasuringDeviceDto measuringDeviceDto;
 
     @Getter
     @Setter
-    private String newPassword;
+    private String sensorName;
 }

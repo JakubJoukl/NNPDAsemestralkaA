@@ -1,13 +1,11 @@
 package com.example.semestralkaa.security;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -72,13 +70,14 @@ public class JwtService {
     }
 
     // Check if the token is expired
-    private Boolean isTokenExpired(String token) {
+    public Boolean isTokenExpiredOrNull(String token) {
+        if(token == null) return true;
         return extractExpiration(token).before(new Date());
     }
 
     // Validate the token against user details and expiration
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        return (username.equals(userDetails.getUsername()) && !isTokenExpiredOrNull(token));
     }
 }
