@@ -1,4 +1,4 @@
-package com.example.semestralkaa.dto;
+package com.example.semestralkaa.dto.user;
 
 import lombok.Getter;
 import lombok.Setter;

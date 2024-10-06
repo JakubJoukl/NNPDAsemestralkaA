@@ -1,12 +1,12 @@
-package com.example.semestralkaa.dto;
+package com.example.semestralkaa.dto.user;
 
 import lombok.Getter;
 import lombok.Setter;
 
-public class LoginDto {
+public class NewPasswordDto {
     @Getter
     @Setter
-    private String username;
+    private String token;
 
     @Getter
     @Setter

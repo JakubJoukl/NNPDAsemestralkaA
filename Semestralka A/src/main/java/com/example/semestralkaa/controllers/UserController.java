@@ -1,9 +1,7 @@
 package com.example.semestralkaa.controllers;
 
-import com.example.semestralkaa.dto.*;
-import com.example.semestralkaa.entity.MeasuringDevice;
+import com.example.semestralkaa.dto.user.*;
 import com.example.semestralkaa.entity.ResetToken;
-import com.example.semestralkaa.entity.Sensor;
 import com.example.semestralkaa.entity.User;
 import com.example.semestralkaa.security.JwtService;
 import com.example.semestralkaa.services.EmailService;
@@ -17,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -88,7 +85,7 @@ public class UserController {
 
         if(user == null) return ResponseEntity.status(404).body("User not found");
         String oldPassword = changePasswordDto.getOldPassword();
-        if(userService.checkUserPassword(oldPassword, user)) return ResponseEntity.status(400).body("Old password was wrong");
+        if(!userService.userPasswordMatches(oldPassword, user)) return ResponseEntity.status(400).body("Old password was wrong");
 
         String newPassword = changePasswordDto.getNewPassword();
         userService.changePassword(newPassword, user);

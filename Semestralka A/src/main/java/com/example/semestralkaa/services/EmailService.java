@@ -16,6 +16,7 @@ import com.example.semestralkaa.entity.User;
 import com.sun.mail.util.MailSSLSocketFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class EmailService {
@@ -44,6 +45,7 @@ public class EmailService {
         properties.put("mail.smtp.ssl.socketFactory", sf);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void sendResetTokenEmail(User user) throws MessagingException {
         if(user == null) throw new RuntimeException("User is null");
 

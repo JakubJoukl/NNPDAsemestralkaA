@@ -1,5 +1,6 @@
-package com.example.semestralkaa.dto;
+package com.example.semestralkaa.dto.measuringDevice;
 
+import com.example.semestralkaa.dto.measuringDevice.AddMeasuringDeviceSensorDto;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,6 +1,8 @@
 package com.example.semestralkaa.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,14 +21,17 @@ public class ResetToken {
     private int resetTokenId;
 
     @Column
+    @NotNull
     private LocalDateTime validTo;
 
     @Column
     private boolean valid;
 
     @ManyToOne
+    @NotNull
     private User user;
 
+    @NotBlank
     private String token;
 
     public ResetToken(User user, String token) {

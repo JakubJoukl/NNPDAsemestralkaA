@@ -1,6 +1,9 @@
 package com.example.semestralkaa.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,12 +27,15 @@ public class User implements UserDetails {
     private Integer userId;
 
     @Column(length = 50, unique = true)
+    @NotBlank
     private String username;
 
     @Column(length = 255)
+    @NotBlank
     private String password;
 
-    @Column(length = 255)
+    @Column(length = 255, unique = true)
+    @Email
     private String email;
 
     @OneToMany(mappedBy = "user")

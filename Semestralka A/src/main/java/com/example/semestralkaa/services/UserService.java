@@ -1,10 +1,10 @@
 package com.example.semestralkaa.services;
 
 
-import com.example.semestralkaa.dto.*;
+import com.example.semestralkaa.dto.user.RegistrationDto;
+import com.example.semestralkaa.dto.user.UserDto;
 import com.example.semestralkaa.entity.ResetToken;
 import com.example.semestralkaa.entity.User;
-import com.example.semestralkaa.repositories.MeasuringDeviceRepository;
 import com.example.semestralkaa.repositories.ResetTokenRepository;
 import com.example.semestralkaa.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -14,13 +14,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService implements UserDetailsService {
 
-    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private UserRepository userRepository;
@@ -50,6 +52,7 @@ public class UserService implements UserDetailsService {
         return resetTokenRepository.getResetTokenByToken(resetTokenValue).orElseThrow(() -> new RuntimeException("Nebyl nalezen token"));
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void deactivateUserResetTokens(User user){
         user.getResetTokens().forEach(resetToken -> {
             resetToken.setValid(false);
@@ -57,12 +60,14 @@ public class UserService implements UserDetailsService {
         });
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public boolean registerUser(RegistrationDto registrationRequest) {
         boolean alreadyExists = userRepository.getUserByUsername(registrationRequest.getUsername()).isPresent();
         if(alreadyExists) return false;
         else return userRepository.save(new User(null, registrationRequest.getUsername(), encryptPassword(registrationRequest.getPassword()), registrationRequest.getEmail(), null, null)).getUserId() != null;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void changePassword(String newPassword, User user) {
         user.setPassword(encryptPassword(newPassword));
         saveUser(user);
@@ -72,7 +77,7 @@ public class UserService implements UserDetailsService {
         return passwordEncoder.encode(password);
     }
 
-    public boolean checkUserPassword(String password, User user){
+    public boolean userPasswordMatches(String password, User user){
         return passwordEncoder.matches(password, user.getPassword());
     }
 

@@ -1,11 +1,11 @@
-package com.example.semestralkaa.dto;
+package com.example.semestralkaa.dto.measuringDevice;
 
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
 
-public class UpdateDeviceDto {
+public class AddMeasuringDeviceDto {
     @Getter
     @Setter
     String deviceName;
